@@ -16,10 +16,8 @@ import FormSection, {
 } from '../../../Atoms/Form/FormSection'
 import { ISidebarMenuItem } from '../../../Atoms/Sidebar'
 import useAuditSettings from '../../useAuditSettings'
-import useJurisdictionFile from './useJurisdictionFile'
-import { IFileInfo } from '../../useJurisdictions'
-import useStandardizedContestFile from './useStandardizedContestFile'
 import { IAuditSettings } from '../../../../types'
+import { useJurisdictionsFile, useStandardizedContestsFile } from '../../useCSV'
 
 export const Select = styled(HTMLSelect)`
   margin-top: 5px;
