@@ -6,14 +6,14 @@ import { RadioGroup, Radio, Spinner, HTMLSelect } from '@blueprintjs/core'
 import FormButtonBar from '../../../Atoms/Form/FormButtonBar'
 import FormButton from '../../../Atoms/Form/FormButton'
 import { ISidebarMenuItem } from '../../../Atoms/Sidebar'
-import { IValues } from './types'
 import FormWrapper from '../../../Atoms/Form/FormWrapper'
 import FormSection from '../../../Atoms/Form/FormSection'
 import { generateOptions, ErrorLabel } from '../../../Atoms/Form/_helpers'
 import { parse as parseNumber } from '../../../../utils/number-schema'
 import FormField from '../../../Atoms/Form/FormField'
 import schema from './schema'
-import useAuditSettings from '../../useAuditSettings'
+import useAuditSettings, { IAuditSettings } from '../../useAuditSettings'
+import labelValueStates from './states'
 
 const Select = styled(HTMLSelect)`
   margin-left: 5px;
@@ -25,23 +25,30 @@ interface IProps {
   prevStage: ISidebarMenuItem
 }
 
+type IValues = Pick<
+  IAuditSettings,
+  'state' | 'electionName' | 'online' | 'randomSeed' | 'riskLimit'
+>
+
 const Settings: React.FC<IProps> = ({
   nextStage,
   prevStage,
   locked,
 }: IProps) => {
   const { electionId } = useParams<{ electionId: string }>()
-  const [auditSettings, updateState] = useAuditSettings(electionId!)
+  const [auditSettings, updateSettings] = useAuditSettings(electionId!)
   if (!auditSettings) return null // still loading
   const {
+    state,
     electionName,
     randomSeed,
     riskLimit,
     online,
     auditType,
   } = auditSettings
+
   const submit = async (values: IValues) => {
-    const response = await updateState({
+    const response = await updateSettings({
       ...values,
       riskLimit: parseNumber(values.riskLimit), // Formik stringifies internally
     })
@@ -50,12 +57,15 @@ const Settings: React.FC<IProps> = ({
     if (nextStage.activate) nextStage.activate()
     else throw new Error('Wrong menuItems passed in: activate() is missing')
   }
+
   const initialValues = {
+    state: state === null ? '' : state,
     electionName: electionName === null ? '' : electionName,
     randomSeed: randomSeed === null ? '' : randomSeed,
     riskLimit: riskLimit === null ? 10 : riskLimit,
     online,
   }
+
   return (
     <Formik
       initialValues={initialValues}
@@ -66,6 +76,24 @@ const Settings: React.FC<IProps> = ({
       {({ handleSubmit, setFieldValue, values }: FormikProps<IValues>) => (
         <form data-testid="form-one">
           <FormWrapper title="Audit Settings">
+            <FormSection>
+              {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+              <label htmlFor="state">
+                State
+                <Field
+                  component={Select}
+                  id="state"
+                  name="state"
+                  onChange={(e: React.FormEvent<HTMLSelectElement>) =>
+                    setFieldValue('state', e.currentTarget.value)
+                  }
+                  disabled={locked}
+                  value={values.state}
+                  options={[{ value: '' }, ...labelValueStates]}
+                />
+              </label>
+              <ErrorMessage name="state" component={ErrorLabel} />
+            </FormSection>
             <FormSection>
               {/* eslint-disable jsx-a11y/label-has-associated-control */}
               <label htmlFor="election-name" id="election-name-label">

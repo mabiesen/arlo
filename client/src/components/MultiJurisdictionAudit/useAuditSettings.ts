@@ -1,22 +1,29 @@
 import { useEffect, useCallback, useState } from 'react'
 import { api } from '../utilities'
-import { IAuditSettings } from '../../types'
 
-type TNewSettings =
-  | {
-      state: IAuditSettings['state']
-    }
-  | {
-      electionName: IAuditSettings['electionName']
-      online: IAuditSettings['online']
-      randomSeed: IAuditSettings['randomSeed']
-      riskLimit: IAuditSettings['riskLimit']
-    }
+export interface IAuditSettings {
+  state: string | null
+  electionName: string | null
+  online: boolean | null
+  randomSeed: string | null
+  riskLimit: number | null
+  auditType: 'BALLOT_POLLING' | 'BATCH_COMPARISON' | 'BALLOT_COMPARISON'
+  auditMathType: 'BRAVO' | 'MINERVA' | 'SUPERSIMPLE' | 'MACRO'
+  auditName: string
+}
+
+interface INewSettings {
+  state: IAuditSettings['state']
+  electionName: IAuditSettings['electionName']
+  online: IAuditSettings['online']
+  randomSeed: IAuditSettings['randomSeed']
+  riskLimit: IAuditSettings['riskLimit']
+}
 
 const useAuditSettings = (
   electionId: string,
   refreshId?: string
-): [IAuditSettings | null, (arg0: TNewSettings) => Promise<boolean>] => {
+): [IAuditSettings | null, (arg0: INewSettings) => Promise<boolean>] => {
   const [settings, setSettings] = useState<IAuditSettings | null>(null)
 
   const getSettings = useCallback(async (): Promise<IAuditSettings | null> => {
@@ -24,7 +31,7 @@ const useAuditSettings = (
   }, [electionId])
 
   const updateSettings = async (
-    newSettings: TNewSettings
+    newSettings: INewSettings
   ): Promise<boolean> => {
     const oldSettings = await getSettings()
     const mergedSettings = {

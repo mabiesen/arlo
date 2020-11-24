@@ -9,7 +9,6 @@ import { HTMLSelect, Spinner, FileInput, H5 } from '@blueprintjs/core'
 import FormWrapper from '../../../Atoms/Form/FormWrapper'
 import FormButtonBar from '../../../Atoms/Form/FormButtonBar'
 import FormButton from '../../../Atoms/Form/FormButton'
-import labelValueStates from './states'
 import { ErrorLabel } from '../../../Atoms/Form/_helpers'
 import FormSection, {
   FormSectionDescription,
@@ -19,7 +18,6 @@ import useAuditSettings from '../../useAuditSettings'
 import useJurisdictionFile from './useJurisdictionFile'
 import { IFileInfo } from '../../useJurisdictions'
 import useStandardizedContestFile from './useStandardizedContestFile'
-import { IAuditSettings } from '../../../../types'
 
 export const Select = styled(HTMLSelect)`
   margin-top: 5px;
@@ -65,9 +63,7 @@ const Participants: React.FC<IProps> = ({ locked, nextStage }: IProps) => {
 
   const isBallotComparison = auditSettings.auditType === 'BALLOT_COMPARISON'
 
-  const submit = async ({ state }: { state: IAuditSettings['state'] }) => {
-    const response = await updateSettings({ state })
-    if (!response) return
+  const submit = () => {
     setJurisdictionFileStatus('submit') // tell the jurisdiction file component to submit
     if (isBallotComparison) setContestFileStatus('submit') // tell the contest file component to submit
   }
@@ -92,25 +88,6 @@ const Participants: React.FC<IProps> = ({ locked, nextStage }: IProps) => {
               isBallotComparison ? 'Participants & Contests' : 'Participants'
             }
           >
-            <FormSection>
-              <label htmlFor="state">
-                Choose your state from the options below
-                <br />
-                <Field
-                  component={Select}
-                  id="state"
-                  data-testid="state-field"
-                  name="state"
-                  onChange={(e: React.FormEvent<HTMLSelectElement>) =>
-                    setFieldValue('state', e.currentTarget.value)
-                  }
-                  disabled={locked}
-                  value={values.state || ''}
-                  options={[{ value: '' }, ...labelValueStates]}
-                />
-              </label>
-              <ErrorMessage name="state" component={ErrorLabel} />
-            </FormSection>
             {isBallotComparison && <H5>Participants File</H5>}
             <JurisdictionFileForm
               electionId={electionId}
